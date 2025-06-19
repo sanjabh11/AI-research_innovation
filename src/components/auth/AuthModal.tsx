@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Dialog, DialogContent, DialogOverlay } from '../ui/dialog';
+import { Dialog, DialogContent, DialogOverlay, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 
@@ -21,6 +21,18 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'login' }: AuthModalP
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogOverlay className="bg-black/60 backdrop-blur-sm" />
       <DialogContent className="max-w-md p-0 border-0 bg-transparent shadow-none">
+        <DialogHeader className="sr-only">
+          <DialogTitle>
+            {mode === 'login' ? 'Sign In to ARIA Platform' : 'Create ARIA Platform Account'}
+          </DialogTitle>
+          <DialogDescription>
+            {mode === 'login' 
+              ? 'Enter your credentials to access your account' 
+              : 'Fill out the form to create your new account'
+            }
+          </DialogDescription>
+        </DialogHeader>
+        
         <AnimatePresence mode="wait">
           {mode === 'login' ? (
             <motion.div

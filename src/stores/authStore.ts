@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseReady } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthState {
@@ -24,6 +24,10 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       signIn: async (email: string, password: string) => {
+        if (!isSupabaseReady) {
+          throw new Error('Supabase is not configured. Please check your environment variables.');
+        }
+
         set({ isLoading: true });
         try {
           const { data, error } = await supabase.auth.signInWithPassword({
@@ -46,6 +50,10 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signUp: async (email: string, password: string, metadata = {}) => {
+        if (!isSupabaseReady) {
+          throw new Error('Supabase is not configured. Please set up your environment variables and connect to Supabase.');
+        }
+
         set({ isLoading: true });
         try {
           const { data, error } = await supabase.auth.signUp({
@@ -71,6 +79,17 @@ export const useAuthStore = create<AuthState>()(
       },
 
       signOut: async () => {
+        if (!isSupabaseReady) {
+          // If Supabase isn't configured, just clear local state
+          set({
+            user: null,
+            session: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+          return;
+        }
+
         set({ isLoading: true });
         try {
           const { error } = await supabase.auth.signOut();
@@ -89,6 +108,10 @@ export const useAuthStore = create<AuthState>()(
       },
 
       updateProfile: async (updates: any) => {
+        if (!isSupabaseReady) {
+          throw new Error('Supabase is not configured. Please check your environment variables.');
+        }
+
         const { user } = get();
         if (!user) throw new Error('No user logged in');
         
@@ -106,6 +129,12 @@ export const useAuthStore = create<AuthState>()(
       },
 
       initialize: async () => {
+        if (!isSupabaseReady) {
+          console.warn('Supabase not configured - running in demo mode');
+          set({ isLoading: false });
+          return;
+        }
+
         try {
           const { data: { session } } = await supabase.auth.getSession();
           
