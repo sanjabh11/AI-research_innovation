@@ -1,24 +1,62 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { AuthModal } from '../components/auth/AuthModal';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { AuthModal } from '../components/auth/AuthModal';
+import { ArrowRight, Zap, CheckCircle, Star, BookOpen, Shield, Lightbulb, Users, BarChart3, Rocket } from 'lucide-react';
+
+// Feature list for mapping in Features section
+const features = [
+  {
+    icon: BookOpen,
+    title: 'AI-Powered Research',
+    description: 'Conduct comprehensive literature reviews and identify research gaps with advanced AI analysis.',
+    color: 'text-aria-blue-600',
+    bgColor: 'bg-aria-blue-50'
+  },
+  {
+    icon: Shield,
+    title: 'Patent Intelligence',
+    description: 'Navigate patent landscapes, identify white spaces, and assess IP opportunities.',
+    color: 'text-aria-purple-600',
+    bgColor: 'bg-aria-purple-50'
+  },
+  {
+    icon: Lightbulb,
+    title: 'Invention Generation',
+    description: 'Generate novel, patentable inventions from research insights and market needs.',
+    color: 'text-yellow-600',
+    bgColor: 'bg-yellow-50'
+  },
+  {
+    icon: Users,
+    title: 'Expert Collaboration',
+    description: 'Connect with researchers, inventors, and industry experts worldwide.',
+    color: 'text-aria-green-600',
+    bgColor: 'bg-aria-green-50'
+  },
+  {
+    icon: BarChart3,
+    title: 'Advanced Analytics',
+    description: 'Track research impact, patent performance, and innovation metrics.',
+    color: 'text-red-600',
+    bgColor: 'bg-red-50'
+  },
+  {
+    icon: Rocket,
+    title: 'Commercialization',
+    description: 'Accelerate technology transfer and identify licensing opportunities.',
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50'
+  }
+];
 import { useAuthStore } from '../stores/authStore';
-import {
-  Zap,
-  BookOpen,
-  Shield,
-  Lightbulb,
-  Users,
-  BarChart3,
-  ArrowRight,
-  CheckCircle,
-  Star,
-  Globe,
-  Rocket,
-  Brain
-} from 'lucide-react';
+import { Hero } from '../components/landing/Hero';
+import { Features } from '../components/landing/Features';
+import { Testimonials } from '../components/landing/Testimonials';
+import { CTA } from '../components/landing/CTA';
+import { Footer } from '../components/landing/Footer';
 
 export function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -33,50 +71,7 @@ export function LandingPage() {
     }
   }, [isAuthenticated, navigate]);
 
-  const features = [
-    {
-      icon: BookOpen,
-      title: 'AI-Powered Research',
-      description: 'Conduct comprehensive literature reviews and identify research gaps with advanced AI analysis.',
-      color: 'text-aria-blue-600',
-      bgColor: 'bg-aria-blue-50'
-    },
-    {
-      icon: Shield,
-      title: 'Patent Intelligence',
-      description: 'Navigate patent landscapes, identify white spaces, and assess IP opportunities.',
-      color: 'text-aria-purple-600',
-      bgColor: 'bg-aria-purple-50'
-    },
-    {
-      icon: Lightbulb,
-      title: 'Invention Generation',
-      description: 'Generate novel, patentable inventions from research insights and market needs.',
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50'
-    },
-    {
-      icon: Users,
-      title: 'Expert Collaboration',
-      description: 'Connect with researchers, inventors, and industry experts worldwide.',
-      color: 'text-aria-green-600',
-      bgColor: 'bg-aria-green-50'
-    },
-    {
-      icon: BarChart3,
-      title: 'Advanced Analytics',
-      description: 'Track research impact, patent performance, and innovation metrics.',
-      color: 'text-red-600',
-      bgColor: 'bg-red-50'
-    },
-    {
-      icon: Rocket,
-      title: 'Commercialization',
-      description: 'Accelerate technology transfer and identify licensing opportunities.',
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50'
-    }
-  ];
+
 
   const testimonials = [
     {
@@ -120,7 +115,12 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
+      <Hero />
+      <Features />
+      <Testimonials />
+      <CTA onSignUp={handleSignUp} />
+      <Footer />
       {/* Header */}
       <motion.header 
         className="border-b"
@@ -153,7 +153,7 @@ export function LandingPage() {
               Sign In
             </motion.button>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="default" onClick={handleSignUp} className="aria-gradient text-white">
+              <Button variant="primary" onClick={handleSignUp} className="aria-gradient text-white">
                 Get Started
               </Button>
             </motion.div>
@@ -198,7 +198,7 @@ export function LandingPage() {
             >
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Button 
-                  size="lg" 
+                  
                   className="text-lg px-8 py-4 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 text-white"
                   onClick={handleSignUp}
                 >
@@ -207,7 +207,7 @@ export function LandingPage() {
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button size="lg" variant="outline" className="text-lg px-8 py-4">
+                <Button variant="outline" className="text-lg px-8 py-4">
                   Watch Demo
                 </Button>
               </motion.div>
@@ -499,7 +499,7 @@ export function LandingPage() {
             whileTap={{ scale: 0.95 }}
           >
             <Button 
-              size="lg" 
+              
               className="bg-white text-aria-blue-700 hover:bg-gray-100 text-lg px-8 py-6"
               onClick={handleSignUp}
             >

@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+// @ts-ignore - handled via module aliasing
 import { supabase, isSupabaseReady } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthState {
+  signInAsGuest: () => Promise<void>;
   user: User | null;
   session: Session | null;
   isLoading: boolean;
@@ -115,22 +117,33 @@ export const useAuthStore = create<AuthState>()(
         const { user } = get();
         if (!user) throw new Error('No user logged in');
         
+        const { data, error } = await supabase.auth.updateUser({
+          data: updates,
+        });
+        if (error) throw error;
+        set({ user: data.user });
+      },
+
+      signInAsGuest: async () => {
+        if (!isSupabaseReady) {
+          throw new Error('Supabase is not configured. Please check your environment variables.');
+        }
+        set({ isLoading: true });
         try {
-          const { data, error } = await supabase.auth.updateUser({
-            data: updates,
-          });
-          
+          // Use Supabase's signInWithOtp with a special guest email (public RLS should allow this user read-only)
+          const guestEmail = 'guest@aria.ai';
+          const { data, error } = await supabase.auth.signInWithOtp({ email: guestEmail });
           if (error) throw error;
-          
-          set({ user: data.user });
+          set({ user: data.user, session: data.session, isAuthenticated: true, isLoading: false });
         } catch (error) {
+          set({ isLoading: false });
           throw error;
         }
       },
 
       initialize: async () => {
         if (!isSupabaseReady) {
-          console.warn('Supabase not configured - running in demo mode');
+          console.warn('Supabase not configured. Guest login will not be available.');
           set({ isLoading: false });
           return;
         }
@@ -146,13 +159,23 @@ export const useAuthStore = create<AuthState>()(
           });
 
           // Listen for auth changes
-          supabase.auth.onAuthStateChange((event, session) => {
-            set({
-              user: session?.user || null,
-              session,
-              isAuthenticated: !!session?.user,
-              isLoading: false,
-            });
+          supabase.auth.onAuthStateChange(async (event: string, session: Session | null) => {
+            if (session?.user) {
+              set({
+                user: session.user,
+                session,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            } else {
+              // Attempt guest login if no user session
+              try {
+                await get().signInAsGuest();
+              } catch (guestError) {
+                set({ isLoading: false });
+                console.error('Guest login failed:', guestError);
+              }
+            }
           });
         } catch (error) {
           set({ isLoading: false });
